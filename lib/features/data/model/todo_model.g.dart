@@ -28,13 +28,14 @@ class TodoAdapter extends TypeAdapter<Todo> {
       createdAt: fields[8] as DateTime?,
       updatedAt: fields[9] as DateTime?,
       sortOrder: fields[10] as int?,
+      time: fields[11] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Todo obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -56,7 +57,9 @@ class TodoAdapter extends TypeAdapter<Todo> {
       ..writeByte(9)
       ..write(obj.updatedAt)
       ..writeByte(10)
-      ..write(obj.sortOrder);
+      ..write(obj.sortOrder)
+      ..writeByte(11)
+      ..write(obj.time);
   }
 
   @override

@@ -39,6 +39,9 @@ class Todo extends HiveObject {
   @HiveField(10)
   int? sortOrder;
 
+  @HiveField(11)
+  String? time; // Time in HH:mm format (e.g., "14:30")
+
   Todo({
     required this.id,
     required this.name,
@@ -51,6 +54,7 @@ class Todo extends HiveObject {
     DateTime? createdAt,
     DateTime? updatedAt,
     this.sortOrder,
+    this.time,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -67,6 +71,7 @@ class Todo extends HiveObject {
     DateTime? createdAt,
     DateTime? updatedAt,
     int? sortOrder,
+    String? time,
   }) {
     return Todo(
       id: id ?? this.id,
@@ -80,6 +85,7 @@ class Todo extends HiveObject {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       sortOrder: sortOrder ?? this.sortOrder,
+      time: time ?? this.time,
     );
   }
 
@@ -97,6 +103,7 @@ class Todo extends HiveObject {
       'createdAt': createdAt.millisecondsSinceEpoch,
       'updatedAt': updatedAt.millisecondsSinceEpoch,
       'sortOrder': sortOrder,
+      'time': time,
     };
   }
 
@@ -117,6 +124,7 @@ class Todo extends HiveObject {
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt']),
       updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAt']),
       sortOrder: map['sortOrder'],
+      time: map['time'],
     );
   }
 }

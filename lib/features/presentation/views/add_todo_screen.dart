@@ -29,6 +29,7 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
   final _descriptionController = TextEditingController();
 
   DateTime _selectedDate = DateTime.now();
+  TimeOfDay? _selectedTime;
   String? _selectedCategory;
   int _selectedPriority = 2;
 
@@ -46,12 +47,19 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
       setState(() => _isLoading = true);
 
       try {
+        // Format time as HH:mm string if selected
+        String? timeString;
+        if (_selectedTime != null) {
+          timeString = '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
+        }
+
         await _todoController.addTodo(
           name: _nameController.text.trim(),
           description: _descriptionController.text.trim(),
           date: _selectedDate,
           category: _selectedCategory,
           priority: _selectedPriority,
+          time: timeString,
         );
 
         // Navigate back first
@@ -90,6 +98,26 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: _themeController.primaryColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _selectedTime = picked);
     }
   }
 
@@ -145,6 +173,26 @@ class _AddTodoScreenState extends State<AddTodoScreen> {
                     onTap: _selectDate,
                     prefixIcon: Icon(
                       Icons.calendar_today_outlined,
+                      color: themeController.primaryColor,
+                      size: 20,
+                    ),
+                  ),
+
+                  SizedBox(height: XSizes.spacingLg),
+
+                  // Time Picker
+                  CustomTextField(
+                    controller: TextEditingController(
+                      text: _selectedTime != null 
+                          ? _selectedTime!.format(context)
+                          : '',
+                    ),
+                    label: XString.time,
+                    hint: XString.selectTime,
+                    readOnly: true,
+                    onTap: _selectTime,
+                    prefixIcon: Icon(
+                      Icons.access_time_outlined,
                       color: themeController.primaryColor,
                       size: 20,
                     ),

@@ -23,6 +23,7 @@ class XString {
   static const String taskName = 'Task Name';
   static const String description = 'Description';
   static const String dueDate = 'Due Date';
+  static const String time = 'Time';
   static const String priority = 'Priority';
   static const String category = 'Category';
 
@@ -30,6 +31,7 @@ class XString {
   static const String enterTaskName = 'Enter task name';
   static const String enterDescription = 'Enter task description (optional)';
   static const String selectDueDate = 'Select due date';
+  static const String selectTime = 'Select time';
 
   // Success Messages
   static const String taskCreatedSuccessfully = 'Task created successfully!';

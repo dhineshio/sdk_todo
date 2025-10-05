@@ -104,6 +104,7 @@ class TodoController extends GetxController {
     String? category,
     int? priority,
     DateTime? reminderTime,
+    String? time,
   }) async {
     _isLoading.value = true;
     try {
@@ -119,6 +120,7 @@ class TodoController extends GetxController {
         priority: priority ?? 2,
         reminderTime: reminderTime,
         sortOrder: nextSortOrder,
+        time: time,
       );
 
       // Add the todo to our local list first for immediate UI update

@@ -32,6 +32,7 @@ class _EditTodoScreenState extends State<EditTodoScreen> {
   late final TextEditingController _descriptionController;
 
   late DateTime _selectedDate;
+  late TimeOfDay? _selectedTime;
   late String? _selectedCategory;
   late int _selectedPriority;
 
@@ -46,6 +47,22 @@ class _EditTodoScreenState extends State<EditTodoScreen> {
       text: widget.todo.description,
     );
     _selectedDate = widget.todo.date;
+    
+    // Parse time from string if available
+    if (widget.todo.time != null && widget.todo.time!.isNotEmpty) {
+      final timeParts = widget.todo.time!.split(':');
+      if (timeParts.length == 2) {
+        _selectedTime = TimeOfDay(
+          hour: int.parse(timeParts[0]),
+          minute: int.parse(timeParts[1]),
+        );
+      } else {
+        _selectedTime = null;
+      }
+    } else {
+      _selectedTime = null;
+    }
+    
     _selectedCategory = widget.todo.category;
     _selectedPriority = widget.todo.priority ?? 2;
   }
@@ -62,12 +79,19 @@ class _EditTodoScreenState extends State<EditTodoScreen> {
       setState(() => _isLoading = true);
 
       try {
+        // Format time as HH:mm string if selected
+        String? timeString;
+        if (_selectedTime != null) {
+          timeString = '${_selectedTime!.hour.toString().padLeft(2, '0')}:${_selectedTime!.minute.toString().padLeft(2, '0')}';
+        }
+
         final updatedTodo = widget.todo.copyWith(
           name: _nameController.text.trim(),
           description: _descriptionController.text.trim(),
           date: _selectedDate,
           category: _selectedCategory,
           priority: _selectedPriority,
+          time: timeString,
         );
 
         await _todoController.updateTodo(updatedTodo);
@@ -108,6 +132,26 @@ class _EditTodoScreenState extends State<EditTodoScreen> {
     );
     if (picked != null) {
       setState(() => _selectedDate = picked);
+    }
+  }
+
+  Future<void> _selectTime() async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: _themeController.primaryColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() => _selectedTime = picked);
     }
   }
 
@@ -214,6 +258,26 @@ class _EditTodoScreenState extends State<EditTodoScreen> {
                     onTap: _selectDate,
                     prefixIcon: Icon(
                       Icons.calendar_today_outlined,
+                      color: themeController.primaryColor,
+                      size: 20,
+                    ),
+                  ),
+
+                  SizedBox(height: XSizes.spacingLg),
+
+                  // Time Picker
+                  CustomTextField(
+                    controller: TextEditingController(
+                      text: _selectedTime != null 
+                          ? _selectedTime!.format(context)
+                          : '',
+                    ),
+                    label: XString.time,
+                    hint: XString.selectTime,
+                    readOnly: true,
+                    onTap: _selectTime,
+                    prefixIcon: Icon(
+                      Icons.access_time_outlined,
                       color: themeController.primaryColor,
                       size: 20,
                     ),
