@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../data/model/todo_model.dart';
 import '../../data/source/hive_service.dart';
+import '../../data/source/notification_service.dart';
 import '../../../utils/constants/strings.dart';
 import '../../../utils/helpers/snackbar_helper.dart';
 
@@ -13,6 +14,17 @@ import '../../../utils/helpers/snackbar_helper.dart';
 /// Handles CRUD operations, filtering, sorting, and category management
 class TodoController extends GetxController {
   final HiveService _hiveService = HiveService();
+  NotificationService? _notificationService;
+
+  NotificationService? get notificationService {
+    try {
+      _notificationService ??= Get.find<NotificationService>();
+      return _notificationService!;
+    } catch (e) {
+      debugPrint('NotificationService not available: $e');
+      return null;
+    }
+  }
 
   // Observable lists
   final RxList<Todo> _todos = <Todo>[].obs;
@@ -64,6 +76,9 @@ class TodoController extends GetxController {
 
       await loadTodos();
       await _loadCategories();
+      
+      // Reschedule all notifications on app start
+      await _rescheduleAllNotifications();
     } catch (e) {
       debugPrint('Error in _initHive: $e');
       SnackbarHelper.showError(
@@ -130,6 +145,13 @@ class TodoController extends GetxController {
       try {
         // Then try to save it to Hive
         await _hiveService.addTodo(todo);
+        
+        // Schedule notification reminder (10 minutes before due time)
+        final notifService = notificationService;
+        if (notifService != null) {
+          await notifService.scheduleReminderNotification(todo);
+        }
+        
         await loadTodos(); // Refresh from database
 
         SnackbarHelper.showSuccess(XString.todoAddedSuccessfully);
@@ -155,6 +177,16 @@ class TodoController extends GetxController {
       // Update the updatedAt timestamp
       final updatedTodo = todo.copyWith(updatedAt: DateTime.now());
       await _hiveService.updateTodo(updatedTodo);
+      
+      // Cancel existing notification and reschedule if needed
+      final notifService = notificationService;
+      if (notifService != null) {
+        await notifService.cancelNotification(updatedTodo.id);
+        if (!updatedTodo.isCompleted) {
+          await notifService.scheduleReminderNotification(updatedTodo);
+        }
+      }
+      
       await loadTodos();
 
       SnackbarHelper.showSuccess(XString.taskUpdatedSuccessfully);
@@ -175,6 +207,12 @@ class TodoController extends GetxController {
   Future<void> deleteTodo(String id) async {
     _isLoading.value = true;
     try {
+      // Cancel any scheduled notification for this todo
+      final notifService = notificationService;
+      if (notifService != null) {
+        await notifService.cancelNotification(id);
+      }
+      
       await _hiveService.deleteTodo(id);
       await loadTodos();
 
@@ -427,6 +465,39 @@ class TodoController extends GetxController {
     }
 
     return maxSortOrder + 1;
+  }
+
+  // Reschedule all notifications for incomplete todos
+  Future<void> _rescheduleAllNotifications() async {
+    try {
+      final notifService = notificationService;
+      if (notifService != null) {
+        final incompleteTodos = _todos.where((todo) => !todo.isCompleted).toList();
+        await notifService.rescheduleAllNotifications(incompleteTodos);
+        debugPrint('Rescheduled notifications for ${incompleteTodos.length} todos');
+      } else {
+        debugPrint('NotificationService not available for rescheduling');
+      }
+    } catch (e) {
+      debugPrint('Error rescheduling notifications: $e');
+    }
+  }
+
+  // Method to manually test notifications (for debugging)
+  Future<void> testNotification() async {
+    try {
+      final notifService = notificationService;
+      if (notifService != null) {
+        await notifService.showImmediateNotification(
+          'Test Notification',
+          'This is a test notification from SDK Todo!',
+        );
+      } else {
+        debugPrint('NotificationService not available for testing');
+      }
+    } catch (e) {
+      debugPrint('Error showing test notification: $e');
+    }
   }
 
   @override

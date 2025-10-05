@@ -5,8 +5,14 @@ import '../routes/routes.dart';
 
 class OnboardingController extends GetxController {
   void continueToHome() async {
-    final prefs = Get.find<SharedPreferences>();
-    await prefs.setBool('onboarding_completed', true);
-    Get.offNamed(XRoutes.home);
+    try {
+      final prefs = Get.find<SharedPreferences>();
+      await prefs.setBool('onboarding_completed', true);
+      Get.offNamed(XRoutes.home);
+    } catch (e) {
+      // If SharedPreferences is not available, just navigate to home
+      // This can happen during initialization
+      Get.offNamed(XRoutes.home);
+    }
   }
 }

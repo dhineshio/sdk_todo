@@ -28,7 +28,7 @@ class SplashController extends GetxController {
         Get.offNamed(XRoutes.onboarding);
       }
     } catch (e) {
-      // If there's an error, default to onboarding
+      // If there's an error accessing SharedPreferences, default to onboarding
       debugPrint('Error in splash initialization: $e');
       Get.offNamed(XRoutes.onboarding);
     }

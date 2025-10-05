@@ -31,8 +31,14 @@ class XThemeController extends GetxController {
   }
 
   void _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    _isLight.value = prefs.getBool('isLightTheme') ?? false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isLight.value = prefs.getBool('isLightTheme') ?? false;
+    } catch (e) {
+      debugPrint('Error loading theme preferences: $e');
+      _isLight.value = false; // Default to dark theme
+    }
+    
     Get.changeTheme(
       _isLight.value
           ? ThemeData.light().copyWith(
@@ -50,8 +56,13 @@ class XThemeController extends GetxController {
   }
 
   void changeTheme(bool isLight) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLightTheme', isLight);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLightTheme', isLight);
+    } catch (e) {
+      debugPrint('Error saving theme preferences: $e');
+    }
+    
     _isLight.value = isLight;
     Get.changeTheme(
       isLight

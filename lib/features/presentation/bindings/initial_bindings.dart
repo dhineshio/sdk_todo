@@ -13,13 +13,7 @@ class InitialBindings extends Bindings {
     Get.put(XThemeController(), permanent: true); // Theme management
     Get.put(SplashController(), permanent: true); // Splash screen logic
 
-    // Initialize todo controller with error handling
-    try {
-      Get.put(TodoController(), permanent: true);
-    } catch (e) {
-      debugPrint('Error initializing TodoController: $e');
-      // Use lazy loading as fallback if immediate initialization fails
-      Get.lazyPut(() => TodoController(), fenix: true);
-    }
+    // Initialize todo controller with error handling - use lazy loading to avoid dependency issues
+    Get.lazyPut(() => TodoController(), fenix: true);
   }
 }

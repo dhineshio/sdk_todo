@@ -88,6 +88,36 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildNotificationTestButton() {
+    return GestureDetector(
+      onTap: () {
+        _todoController.testNotification();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Test notification sent! Check your notifications.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(XSizes.paddingSm),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(XSizes.borderRadiusCircle),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.2),
+            width: 1,
+          ),
+        ),
+        child: Icon(
+          Icons.notifications_active_rounded,
+          color: Colors.white,
+          size: XSizes.iconSizeSm,
+        ),
+      ),
+    );
+  }
+
   Widget _buildDateSelector(XThemeController themeController) {
     return GestureDetector(
       onTap: () => _selectDate(context, themeController),
@@ -249,7 +279,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                             color: Colors.white,
                                           ),
                                         ),
-                                        _buildThemeToggle(themeController),
+                                        Row(
+                                          children: [
+                                            _buildNotificationTestButton(),
+                                            SizedBox(width: XSizes.spacingSm),
+                                            _buildThemeToggle(themeController),
+                                          ],
+                                        ),
                                       ],
                                     ),
                                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sdk_todo/features/data/source/hive_service.dart';
+import 'package:sdk_todo/features/data/source/notification_service.dart';
 import 'package:sdk_todo/utils/constants/fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,6 +18,12 @@ void main() async {
     // Initialize Hive database for local todo storage
     final hiveService = HiveService();
     await hiveService.init();
+
+    // Initialize notification service for reminders
+    final notificationService = NotificationService();
+    await notificationService.init();
+    await notificationService.requestPermissions();
+    Get.put(notificationService);
 
     // Set up SharedPreferences for app settings and user preferences
     final sharedPreferences = await SharedPreferences.getInstance();
