@@ -90,12 +90,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNotificationTestButton() {
     return GestureDetector(
-      onTap: () {
-        _todoController.testNotification();
+      onTap: () async {
+        // Test immediate notification
+        await _todoController.testNotification();
+        
+        // Also test scheduling with a real todo
+        await _testScheduledNotification();
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Test notification sent! Check your notifications.'),
-            duration: Duration(seconds: 2),
+            content: Text('Test notifications sent! Check debug console and notifications in 30 seconds.'),
+            duration: Duration(seconds: 3),
           ),
         );
       },
@@ -116,6 +121,23 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+  
+  Future<void> _testScheduledNotification() async {
+    // Create a test todo with time 35 minutes from now (notification should fire in 25 minutes)
+    final now = DateTime.now();
+    final futureTime = now.add(Duration(minutes: 35));
+    final timeString = '${futureTime.hour.toString().padLeft(2, '0')}:${futureTime.minute.toString().padLeft(2, '0')}';
+    
+    await _todoController.addTodo(
+      name: 'Test Notification Task',
+      description: 'This task was created to test the 10-minute reminder notification.',
+      date: DateTime(futureTime.year, futureTime.month, futureTime.day),
+      time: timeString,
+      priority: 3, // High priority
+    );
+    
+    debugPrint('🧪 Created test task with notification scheduled for ${futureTime.subtract(Duration(minutes: 10))}');
   }
 
   Widget _buildDateSelector(XThemeController themeController) {

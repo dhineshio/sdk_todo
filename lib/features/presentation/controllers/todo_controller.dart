@@ -492,11 +492,31 @@ class TodoController extends GetxController {
           'Test Notification',
           'This is a test notification from SDK Todo!',
         );
+        
+        // Also schedule a test notification for 30 seconds from now
+        await notifService.scheduleTestNotification();
+        
+        // Debug pending notifications
+        await notifService.debugPendingNotifications();
       } else {
         debugPrint('NotificationService not available for testing');
       }
     } catch (e) {
       debugPrint('Error showing test notification: $e');
+    }
+  }
+  
+  // Method to debug all pending notifications
+  Future<void> debugNotifications() async {
+    try {
+      final notifService = notificationService;
+      if (notifService != null) {
+        await notifService.debugNotificationSystem();
+      } else {
+        debugPrint('NotificationService not available for debugging');
+      }
+    } catch (e) {
+      debugPrint('Error debugging notifications: $e');
     }
   }
 
